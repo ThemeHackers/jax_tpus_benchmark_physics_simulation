@@ -8,6 +8,3 @@ pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_
 pip install tensorflow tensorflow-metadata psutil rich
 pip check
 
-git clone https://github.com/ThemeHackers/tpu
-cd tpu
-python3 tpus-benchmark_v3.py
