@@ -82,6 +82,6 @@ Setting command-line parameters is critical and can cause tests to fail:
 
 2.  **Matrix Depth (`-md`) Constraints:**
 
-      * The `-md` (matrix\_depth) value **must be divisible by the number of cores being tested** (e.g., 1, 4, and 8 if you are using a TPU v3-8).
+      * The `-md` (matrix\_depth) value **must be divisible by the number of cores being tested** (e.g., 1, 4, and 8 if you are using a TPU v4-8).
       * If the value is not divisible, the script will automatically skip the 3D (PMAP) test for that specific core count.
       * *Example:* If you use an 8-core TPU and set `-md 64`, all tests will run (64/1, 64/4, 64/8). But if you set `-md 100`, the script will only run the 1-core and 4-core tests, skipping the 8-core test.
