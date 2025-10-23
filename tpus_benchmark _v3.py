@@ -145,27 +145,29 @@ def benchmark_jax_2d(num_cores_to_use: int):
         x.block_until_ready()
         y.block_until_ready()
 
+        for _ in range(WARMUP_STEPS):
+            _ = compiled_op(x,y).block_until_ready()
+
+        start = time.perf_counter()
+        for _ in range(NUM_STEPS):
+            z = compiled_op(x,y)
+        z.block_until_ready()
+
+        total = time.perf_counter()-start
+        avg = total/NUM_STEPS
+
+        GFLOPS = (num_cores_to_use * GFLOPs_MULTIPLIER) / (avg * 1e9)
+        TFLOPS = GFLOPS / 1000
+
     except (jax.errors.JaxRuntimeError, RuntimeError) as e:
-        if "RESOURCE_EXHAUSTED" in str(e) or "OOM" in str(e):
-            console.print(f"[red]OOM Error: Failed to allocate tensor of shape {shape}. Skipping 2D test.[/red]")
+        error_msg = str(e).upper()
+        if "RESOURCE_EXHAUSTED" in error_msg or "OOM" in error_msg:
+            console.print(f"[red]OOM Error: Failed to allocate or execute 2D tensor operations.[/red]")
+            console.print(f"[yellow]Try reducing --matrix_size (-mxs). Skipping 2D test.[/yellow]")
             console.print()
             return None 
         else:
             raise e
-
-    for _ in range(WARMUP_STEPS):
-        _ = compiled_op(x,y).block_until_ready()
-
-    start = time.perf_counter()
-    for _ in range(NUM_STEPS):
-        z = compiled_op(x,y)
-    z.block_until_ready()
-
-    total = time.perf_counter()-start
-    avg = total/NUM_STEPS
-
-    GFLOPS = (num_cores_to_use * GFLOPs_MULTIPLIER) / (avg * 1e9)
-    TFLOPS = GFLOPS / 1000
 
     console.print(f"[green]2D Benchmark ({mode}) finished in {total:.2f}s[/green]")
     table = Table(title=f"2D Benchmark Results ({mode})", show_lines=True)
@@ -223,27 +225,65 @@ def benchmark_jax_3d(num_cores_to_use: int):
         x.block_until_ready()
         y.block_until_ready()
 
+        for _ in range(WARMUP_STEPS):
+            _ = compiled_op(x,y).block_until_ready()
+
+        start = time.perf_counter()
+        for _ in range(NUM_STEPS):
+            z = compiled_op(x,y)
+        z.block_until_ready()
+
+        total = time.perf_counter()-start
+        avg = total/NUM_STEPS
+
+        GFLOPS = (MATRIX_DEPTH * GFLOPs_MULTIPLIER) / (avg * 1e9)
+        TFLOPS = GFLOPS / 1000
+
     except (jax.errors.JaxRuntimeError, RuntimeError) as e:
-        if "RESOURCE_EXHAUSTED" in str(e) or "OOM" in str(e):
-            console.print(f"[red]OOM Error: Failed to allocate tensor of shape {shape}. Skipping 3D test.[/red]")
+        
+        error_msg = str(e).upper()
+        error_type = str(type(e))
+        
+        if "RESOURCE_EXHAUSTED" in error_msg or "OOM" in error_msg or "XlaRuntimeError" in error_type:
+            console.print(f"[red]OOM Error (XlaRuntimeError): Failed to allocate or execute 3D tensor operations.[/red]")
+            console.print(f"[yellow]The 3D MATRIX_DEPTH ({MATRIX_DEPTH}) is too large for the available accelerator memory.[/yellow]")
+
+            original_depth = MATRIX_DEPTH
+            divisors = [4, 6, 8, 10, 12, 14, 16]
+            
+            possible_divisors = [d for d in divisors if original_depth >= d]
+            
+            suggestion_table = Table(title="Suggested '-md' values to try")
+            suggestion_table.add_column("Command Line Flag", style="cyan")
+            suggestion_table.add_column("Reason", style="dim")
+            
+            added_suggestions = set()
+
+            if not possible_divisors:
+                console.print(f"[red]Your MATRIX_DEPTH ({original_depth}) is too small to be reduced by the available divisors. Try a smaller value manually.[/red]")
+            else:
+                for d in possible_divisors:
+                    new_md = original_depth // d
+                    
+                    if new_md == 0:
+                        continue
+                        
+                    if new_md in added_suggestions:
+                        continue
+                        
+                    suggestion_table.add_row(f"-md {new_md}", f"(Original {original_depth} // {d})")
+                    added_suggestions.add(new_md)
+
+                if added_suggestions:
+                    console.print(suggestion_table)
+                else:
+                    console.print(f"[red]Could not find a valid smaller depth suggestion. Try a much smaller '-md' value.[/red]")
+            
+            console.print(f"[yellow]Skipping 3D test for {num_cores_to_use} cores.[/yellow]")
             console.print()
             return None
         else:
             raise e
-
-    for _ in range(WARMUP_STEPS):
-        _ = compiled_op(x,y).block_until_ready()
-
-    start = time.perf_counter()
-    for _ in range(NUM_STEPS):
-        z = compiled_op(x,y)
-    z.block_until_ready()
-
-    total = time.perf_counter()-start
-    avg = total/NUM_STEPS
-
-    GFLOPS = (MATRIX_DEPTH * GFLOPs_MULTIPLIER) / (avg * 1e9)
-    TFLOPS = GFLOPS / 1000
 
     console.print(f"[green]3D Benchmark ({mode}) finished in {total:.2f}s[/green]")
     table = Table(title=f"3D Benchmark Results ({mode})", show_lines=True)
