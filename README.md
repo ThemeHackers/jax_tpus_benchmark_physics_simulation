@@ -68,7 +68,7 @@ This example runs a lighter workload with 5 warmup steps, 500 test steps, an 819
 python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 10
 ```
 
-**Note:** The `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v3-8). The script will skip tests that do not meet this requirement.
+**Note:** The `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v4-8). The script will skip tests that do not meet this requirement.
 
 
 ## ⚠️ Parameter Warnings
