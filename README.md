@@ -69,3 +69,19 @@ python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 10
 ```
 
 **Note:** The `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v3-8). The script will skip tests that do not meet this requirement.
+
+
+## ⚠️ Parameter Warnings
+
+Setting command-line parameters is critical and can cause tests to fail:
+
+1.  **Out of Memory (OOM):**
+
+      * Setting `-mxs` (matrix\_size) or `-md` (matrix\_depth) **too high** can cause your TPU/VM to run out of memory (OOM). The script will attempt to catch this error and skip the test, but it is best to start with lower values if you are unsure.
+      * The script will suggest smaller `-md` values to try if an OOM occurs during the 3D test.
+
+2.  **Matrix Depth (`-md`) Constraints:**
+
+      * The `-md` (matrix\_depth) value **must be divisible by the number of cores being tested** (e.g., 1, 4, and 8 if you are using a TPU v3-8).
+      * If the value is not divisible, the script will automatically skip the 3D (PMAP) test for that specific core count.
+      * *Example:* If you use an 8-core TPU and set `-md 64`, all tests will run (64/1, 64/4, 64/8). But if you set `-md 100`, the script will only run the 1-core and 4-core tests, skipping the 8-core test.
