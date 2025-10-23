@@ -73,8 +73,8 @@ python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 10
 
 ## ⚠️ Parameter Warnings
 
-Setting command-line parameters is critical and can cause tests to fail:
-
+- Setting command-line parameters is critical and can cause tests to fail
+- Configuration requires careful reading of Google Cloud documentation to avoid errors
 1.  **Out of Memory (OOM):**
 
       * Setting `-mxs` (matrix\_size) or `-md` (matrix\_depth) **too high** can cause your TPU/VM to run out of memory (OOM). The script will attempt to catch this error and skip the test, but it is best to start with lower values if you are unsure.
