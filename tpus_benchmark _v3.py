@@ -275,7 +275,7 @@ def warning(message: str):
 def main():
     warning("Make sure to run this script in an environment with JAX and TPU support installed.")
     warning("Adjust the matrix size and steps via command-line arguments if you encounter OOM errors.")
-    warning("Example: python3 tpus-benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 64")
+    warning("Example: python3 tpus-benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 4")
     check_dependencies()
     list_jax_devices()
     get_system_info()
