@@ -3,12 +3,10 @@
 
 import jax
 import jax.numpy as jnp
-import os
 import time
 import platform
 import psutil
 import sys
-import subprocess
 import argparse
 from rich.console import Console
 from rich.table import Table
