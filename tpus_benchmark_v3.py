@@ -42,7 +42,7 @@ MATRIX_SIZE = max(1, args.matrix_size)
 MATRIX_DEPTH = max(1, args.matrix_depth)
 CONV_SIZE = max(1, args.conv_size)
 BATCH_SIZE = max(1, args.batch_size)
-PRECISION = jnp.float32 if args.precision == "float32" else jnp.bfloat16
+PRECISION = jnp.bfloat16 if args.precision == "bfloat16" else jnp.float32
 
 N = MATRIX_SIZE
 
@@ -350,95 +350,6 @@ def benchmark_jax_3d(num_cores_to_use: int):
         'avg_ms': avg * 1000
     }
 
-def benchmark_jax_conv(num_cores_to_use: int):
-    mode = f"{num_cores_to_use}-Core ({'JIT' if num_cores_to_use == 1 else 'PMAP'})"
-    console.print(Panel.fit(f"[magenta]JAX Convolution Benchmark ({mode})[/magenta]"))
-
-    key = jax.random.PRNGKey(123)
-    kernel_size = 3
-    out_channels = 64
-    in_channels = 3
-
-    try:
-        if num_cores_to_use == 1:
-            compiled_op = op_conv
-            input_shape = (BATCH_SIZE, CONV_SIZE, CONV_SIZE, in_channels)
-            kernel_shape = (kernel_size, kernel_size, in_channels, out_channels)
-            keys = jax.random.split(key, 2)
-            x = jax.random.normal(keys[0], input_shape, dtype=PRECISION)
-            kernel = jax.random.normal(keys[1], kernel_shape, dtype=PRECISION)
-        else:
-            batch_per_core = BATCH_SIZE // num_cores_to_use
-            if batch_per_core == 0:
-                console.print(f"[yellow]Skipping Conv for {num_cores_to_use} cores: batch size {BATCH_SIZE} too small to split.[/yellow]")
-                return None
-            input_shape_per_core = (batch_per_core, CONV_SIZE, CONV_SIZE, in_channels)
-            kernel_shape = (kernel_size, kernel_size, in_channels, out_channels)
-            key_x, key_k = jax.random.split(key, 2)
-            keys_x = jax.random.split(key_x, num_cores_to_use)
-            x_per_core = jax.vmap(lambda k: jax.random.normal(k, input_shape_per_core, dtype=PRECISION))(keys_x)
-            # for conv we keep kernel broadcasted (None)
-            x = jnp.concatenate(x_per_core, axis=0)
-            kernel = jax.random.normal(key_k, kernel_shape, dtype=PRECISION)
-            compiled_op = jax.pmap(op_conv, in_axes=(0, None))
-
-        console.print(f"Allocating Conv Input: {x.shape}, Kernel: {kernel.shape}")
-        x.block_until_ready()
-        kernel.block_until_ready()
-
-        for _ in range(WARMUP_STEPS):
-            _ = compiled_op(x, kernel).block_until_ready()
-
-        start = time.perf_counter()
-        for _ in range(NUM_STEPS):
-            z = compiled_op(x, kernel)
-        z.block_until_ready()
-
-        total = time.perf_counter() - start
-        avg = total / NUM_STEPS
-
-        out_h, out_w = CONV_SIZE, CONV_SIZE
-        conv_gflops = 2 * BATCH_SIZE * out_h * out_w * out_channels * in_channels * kernel_size * kernel_size
-        GFLOPS = conv_gflops / (avg * 1e9)
-        TFLOPS = GFLOPS / 1000
-
-    except (RuntimeError) as e:
-        error_msg = str(e).upper()
-        if "RESOURCE_EXHAUSTED" in error_msg or "OOM" in error_msg:
-            console.print(f"[red]OOM Error: Failed to allocate or execute Conv operations.[/red]")
-            console.print(f"[yellow]Try reducing --conv_size (-c) or --batch_size (-b). Skipping Conv test.[/yellow]")
-            console.print()
-            return None
-        else:
-            console.print(f"[red]Unexpected runtime error in Conv benchmark: {e}[/red]")
-            console.print(traceback.format_exc())
-            return None
-    except Exception as e:
-        console.print(f"[red]Unhandled error in Conv benchmark: {e}[/red]")
-        console.print(traceback.format_exc())
-        return None
-
-    console.print(f"[green]Conv Benchmark ({mode}) finished in {total:.2f}s[/green]")
-    table = Table(title=f"Conv Benchmark Results ({mode})", show_lines=True)
-    table.add_column("Metric", justify="right")
-    table.add_column("Value", justify="left")
-    table.add_row("Mode", f"{num_cores_to_use} Core(s) - {'JIT' if num_cores_to_use == 1 else 'PMAP'}")
-    table.add_row("Input Shape", str((BATCH_SIZE, CONV_SIZE, CONV_SIZE, in_channels)))
-    table.add_row("Kernel Shape", str(kernel_shape))
-    table.add_row("Steps", str(NUM_STEPS))
-    table.add_row("Avg Time per Op (ms)", f"{avg*1000:.3f}")
-    table.add_row("Total GFLOPS", f"{GFLOPS:.2f}")
-    table.add_row("Total TFLOPS", f"{TFLOPS:.2f}")
-    console.print(table)
-    console.print()
-
-    return {
-        'test': 'Conv',
-        'cores': num_cores_to_use,
-        'tflops': TFLOPS,
-        'avg_ms': avg * 1000
-    }
-
 def benchmark_bandwidth(num_cores_to_use: int):
     mode = f"{num_cores_to_use}-Core ({'JIT' if num_cores_to_use == 1 else 'PMAP'})"
     console.print(Panel.fit(f"[magenta]JAX Memory Bandwidth Benchmark ({mode})[/magenta]"))
@@ -727,14 +638,11 @@ def benchmark_multiple_cores(max_cores: int):
 
         res_2d = benchmark_jax_2d(num_cores)
         res_3d = benchmark_jax_3d(num_cores)
-        res_conv = benchmark_jax_conv(num_cores)
         res_fft_2d = benchmark_jax_fft_2d(num_cores)
         res_fft_3d = benchmark_jax_fft_3d(num_cores)
         res_bw = benchmark_bandwidth(num_cores)
-
         if res_2d: all_results.append(res_2d)
         if res_3d: all_results.append(res_3d)
-        if res_conv: all_results.append(res_conv)
         if res_fft_2d: all_results.append(res_fft_2d)
         if res_fft_3d: all_results.append(res_fft_3d)
         if res_bw: all_results.append(res_bw)
