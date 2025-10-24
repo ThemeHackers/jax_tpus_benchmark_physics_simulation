@@ -40,6 +40,8 @@ chmod +x install.sh
 
 # Run the installer
 ./install.sh
+
+source .venv/bin/activate
 ```
 
 **Key libraries installed:**
