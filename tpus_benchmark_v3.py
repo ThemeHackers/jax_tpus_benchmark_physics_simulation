@@ -15,6 +15,7 @@ from rich.table import Table
 from rich.panel import Panel
 from utils.check_deps import check_dependencies 
 from utils.jax_devices import list_jax_devices 
+import csv  # Added for CSV support
 
 try:
     from utils.plt import plot_results
@@ -33,6 +34,7 @@ parser.add_argument("-c", "--conv_size", type=int, default=256)
 parser.add_argument("-b", "--batch_size", type=int, default=32)
 parser.add_argument("--precision", type=str, default="float32", choices=["float32", "bfloat16"])
 parser.add_argument("--max_cores", type=int, default=0, help="Max cores to test (0=auto up to available)")
+parser.add_argument("--csv", type=str, help="Output results to CSV file (e.g., --csv results.csv)")
 
 args = parser.parse_args()
 
@@ -655,7 +657,7 @@ def main():
     warning("New options: -c for conv_size, -b for batch_size, --precision for float32/bfloat16")
     warning("FFT uses --matrix_size and --matrix_depth for input size.")
     warning("Use --max-cores N to limit max cores tested (e.g., --max-cores 16).")
-    warning("Example: python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 4096 -md 8 -c 128 -b 16 --precision bfloat16 --max-cores 16")
+    warning("Use --csv filename.csv to export results to CSV.")
 
     try:
         check_dependencies()
@@ -704,6 +706,22 @@ def main():
 
     console.print()
     if all_results:
+        # CSV Export
+        if args.csv:
+            try:
+                fieldnames = list(set().union(*(d.keys() for d in all_results)))
+                with open(args.csv, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    for res in all_results:
+                        # Ensure all fields are present (fill missing with empty string)
+                        row = {k: res.get(k, '') for k in fieldnames}
+                        writer.writerow(row)
+                console.print(f"[green]Benchmark results exported to [bold]{args.csv}[/bold][/green]")
+            except Exception as e:
+                console.print(f"[red]Error exporting to CSV: {e}[/red]")
+                console.print(traceback.format_exc())
+
         console.print(Panel.fit("[blue]Generating benchmark plot...[/blue]"))
         if PLOTTING_ENABLED:
             try:
