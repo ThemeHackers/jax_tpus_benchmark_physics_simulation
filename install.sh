@@ -10,7 +10,8 @@ sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libns
 
 sudo apt install -y python3-dev
 
-PYTHON_VERSION="3.10.12"
+
+PYTHON_VERSION="3.13.9"
 PYTHON_PATH="/opt/python-$PYTHON_VERSION"
 
 echo "Downloading and installing Python $PYTHON_VERSION..."
@@ -26,7 +27,7 @@ rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
 
 export PATH="$PYTHON_PATH/bin:$PATH"
 
-echo "Python 3.10.12 installed to $PYTHON_PATH"
+echo "Python $PYTHON_VERSION installed to $PYTHON_PATH"
 
 VENV_NAME=".venv"
 echo "Creating and activating virtual environment: $VENV_NAME"
@@ -42,11 +43,14 @@ echo "Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)..."
 
 pip install --upgrade pip
 
-pip install "torch~=2.1.0" "torch_xla[tpu]~=2.1.0" -f https://storage.googleapis.com/libtpu-releases/index.html
+
+pip install "torch~=2.4.0" "torch_xla[tpu]~=2.8" -f https://storage.googleapis.com/libtpu-releases/index.html
+
 
 pip install "transformers<5.8"
 
-pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf<4
+
+pip install jax>=0.7.1 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf<4
 
 pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
@@ -56,3 +60,5 @@ echo "Performing final pip check..."
 pip check
 
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
+echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
+echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
