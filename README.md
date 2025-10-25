@@ -1,19 +1,29 @@
-
 -----
 
 # JAX TPU Benchmark & Physics Simulation 🚀
 
-This project provides a comprehensive benchmark script designed to measure and analyze the performance of JAX on Google Cloud TPUs. It focuses on 2D matrix and 3D tensor computations, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
-- I was invited to participate in the TPU research and development for the TRC project.
-- Since there is a lot of competition for resources here, I got v4-8 (Immediately) , v4-32 (Queued Resources). (The chip is included in the project so it's free.)
-- And I tested using 300$ credit with v3-8 , v2-8. (Chips from using 300$ credits)
-- So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
-- Actually, there are other chips but I can't ask for them because they are full.
-- And most importantly, you may find that the installation completes and checks, but a RuntimeError occurs, which means that the TPU was not found on the hardware for that chip. This is a bug in the library, which is not user-resolved. I've encountered this problem many times, but within this project, what I specified works, and what is not specified means it doesn't work, I think.
+This project provides a comprehensive benchmark script (`tpus_benchmark_v3.py`) designed to measure and analyze the performance of JAX on Google Cloud TPUs. It has been expanded to test a wider variety of computations, including 2D/3D matrix operations, 2D/3D FFT, and memory bandwidth, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
+
+This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim.py`) and a Molecular Dynamics simulation (`molecular_dynamics_jax.py`).
+
+  - I was invited to participate in the TPU research and development for the TRC project.
+  - Since there is a lot of competition for resources here, I got v4-8 (Immediately) , v4-32 (Queued Resources). (The chip is included in the project so it's free.)
+  - And I tested using 300$ credit with v3-8 , v2-8. (Chips from using 300$ credits)
+  - So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
+  - Actually, there are other chips but I can't ask for them because they are full.
+  - And most importantly, you may find that the installation completes and checks, but a RuntimeError occurs, which means that the TPU was not found on the hardware for that chip. This is a bug in the library, which is not user-resolved. I've encountered this problem many times, but within this project, what I specified works, and what is not specified means it doesn't work, I think.
+
 ## ✨ Key Features
 
-  * **Dual-Mode Benchmarking:** Tests both 2D matrix operations (`jnp.dot`) and 3D tensor operations (`jnp.matmul`) to simulate different types of workloads.
-  * **Multi-Core Scaling Analysis:** Automatically runs benchmarks on a single core (using `jax.jit`) and scales up to 4 cores and all available cores (using `jax.pmap`) to evaluate parallel processing efficiency.
+  * **Multi-Mode Benchmarking:** Tests a diverse set of operations:
+      * 2D Matrix Operations (`jnp.dot`)
+      * 3D Tensor Operations (`jnp.matmul`)
+      * 2D & 3D FFT (`jnp.fft.fftn`)
+      * Memory Bandwidth (`jnp.copy`, `jnp.sum`)
+  * **Physics Simulation Examples:**
+      * **N-Body Black Hole Merger**: Simulates N-body dynamics (e.g., 3-body), generates gravitational waveforms, and computes Lyapunov exponents for chaos analysis using JAX ODE integration.
+      * **Molecular Dynamics**: A pure JAX implementation of a 2D Lennard-Jones fluid simulation using a JIT-compiled Verlet integrator, complete with equilibration and production runs.
+  * **Multi-Core Scaling Analysis:** Automatically runs benchmarks on a single core (using `jax.jit`) and scales up to all available cores (using `jax.pmap`) to evaluate parallel processing efficiency.
   * **System & Device Introspection:**
       * Gathers detailed system information, including OS, CPU, Python version, and total system RAM.
       * Lists all available JAX devices, their types (e.g., TPU), platform, and available accelerator memory.
@@ -22,12 +32,14 @@ This project provides a comprehensive benchmark script designed to measure and a
       * `-m` / `--steps`: Number of benchmark steps to average.
       * `-mxs` / `--matrix_size`: The `N` dimension for `(N, N)` matrices.
       * `-md` / `--matrix_depth`: The `D` dimension for `(D, N, N)` tensors.
+      * `--precision`: Data type (`float32` or `bfloat16`).
+      * `--csv`: Output results to a CSV file.
   * **Rich Reporting:**
       * Uses the `rich` library to print beautifully formatted tables and panels to the console for easy reading.
-      * Reports key metrics including average operation time (ms) and total TFLOPS (TeraFLOPs per second).
+      * Reports key metrics including average operation time (ms) and total TFLOPS.
   * **Automatic Plot Generation:**
       * At the end of the benchmark, it automatically generates a PNG plot (`tpu_benchmark_results.png`).
-      * This plot visualizes TFLOPS and Avg. Time (ms) against the number of cores used, providing a clear comparison of 2D vs. 3D performance scaling.
+      * This plot visualizes TFLOPS and Avg. Time (ms) against the number of cores used, providing a clear comparison of performance scaling.
   * **Robust Error Handling:** Includes graceful error handling for Out-of-Memory (OOM) exceptions, particularly for large 3D tensors. If an OOM error occurs, it suggests alternative `--matrix_depth` values to try.
   * **Dependency Checking:** A utility script (`utils/check_deps.py`) verifies that all required Python libraries (`jax`, `rich`, `psutil`) are installed before running.
 
@@ -35,31 +47,81 @@ This project provides a comprehensive benchmark script designed to measure and a
 
 ## 🛠️ Installation
 
-The `install.sh` script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs `jax` with TPU support, `torch_xla`, and the other required Python packages.
+The `install.sh` script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs Python 3.13.9, `jax` with TPU support, `torch_xla`, and the other required Python packages.
 
 ```bash
-# Grant execution permissions
-chmod +x install.sh
+sudo apt update -y
+sudo apt upgrade -y
 
-# Run the installer
-./install.sh
+sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
 
-source .venv/bin/activate
+sudo apt install -y python3-dev
+
+export PYTHON_VERSION="3.13.9"
+export PYTHON_PATH="/opt/python-$PYTHON_VERSION"
+
+wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+tar -xf Python-$PYTHON_VERSION.tgz
+cd Python-$PYTHON_VERSION
+
+./configure --enable-optimizations --prefix=$PYTHON_PATH
+make -j$(nproc)
+sudo make install
+cd ..
+sudo rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
+export PATH="$PYTHON_PATH/bin:$PATH"
+
+sudo cp $PYTHON_PATH/bin/python3.13 /usr/bin/local
+sudo cp $PYTHON_PATH/bin/pip3 /usr/bin/local
+sudo cp $PYTHON_PATH/bin/pip3.13 /usr/bin/local
+
+export VENV_NAME=".venv"
+echo "Creating and activating virtual environment: $VENV_NAME"
+
+"$PYTHON_PATH/bin/python3" -m venv "$VENV_NAME"
+
+source "$VENV_NAME/bin/activate"
+
+python3 --version
+
+echo "Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)..."
+
+pip install --upgrade pip
+
+
+pip install torch torch_xla[tpu] -f https://storage.googleapis.com/libtpu-releases/index.html
+
+pip install "transformers<5.8"
+
+
+pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf
+
+pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+
+pip install psutil rich matplotlib pandas jax-md
+
+pip check
 ```
 
 **Key libraries installed:**
 
   * `jax[tpu]`
-  * `torch_xla`
+  * `torch_xla[tpu]`
+  * `flax`, `orbax-checkpoint`, `clu`
+  * `transformers<5.8`
   * `psutil` (for system info)
   * `rich` (for console UI)
   * `matplotlib` & `pandas` (for plotting results)
+  * `jax-md`
+  * **Note:** `nbody_bh_merger_sim.py` also requires `scipy`. You may need to install it separately: `pip install scipy`.
 
 -----
 
 ## 🚀 How to Run
 
-After installing the dependencies, you can run the main benchmark script.
+After installing the dependencies and activating the virtual environment, you can run the main benchmark script or the physics simulations.
+
+### 1\. Main Benchmark (`tpus_benchmark_v3.py`)
 
 **Default execution:**
 This will run the benchmark with default settings (10 warmup, 1000 steps, 16384 matrix size, 128 matrix depth).
@@ -72,16 +134,45 @@ python3 tpus_benchmark_v3.py
 This example runs a lighter workload with 5 warmup steps, 500 test steps, an 8192x8192 matrix size, and a depth of 64.
 
 ```bash
-python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 10
+python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 64
 ```
 
-**Note:** The `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v4-8). The script will skip tests that do not meet this requirement.
+**Export to CSV:**
+This example runs a test up to 8 cores and saves the results to `results.csv`.
 
+```bash
+python3 tpus_benchmark_v3.py --max_cores 8 --csv results.csv
+```
+
+### 2\. Physics Simulations
+
+**N-Body Black Hole Merger (Interactive):**
+This script will prompt you for parameters (number of bodies, mass, etc.) in the console.
+
+```bash
+python3 nbody_bh_merger_sim.py
+```
+
+**Molecular Dynamics:**
+You can run this with default parameters or specify your own.
+
+```bash
+# Run with defaults (N=400, 10k eq_steps, 10k prod_steps)
+python3 molecular_dynamics_jax.py
+
+# Run a longer production simulation
+python3 molecular_dynamics_jax.py --prod_steps 50000 --eq_steps 20000
+```
+
+**Note:** The `--matrix_depth` (`-md`) value for the main benchmark must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v4-8). The script will skip tests that do not meet this requirement.
 
 ## ⚠️ Parameter Warnings
 
-- Setting command-line parameters is critical and can cause tests to fail
-- Configuration requires careful reading of Google Cloud documentation to avoid errors
+  - Setting command-line parameters is critical and can cause tests to fail
+  - Configuration requires careful reading of Google Cloud documentation to avoid errors
+
+<!-- end list -->
+
 1.  **Out of Memory (OOM):**
 
       * Setting `-mxs` (matrix\_size) or `-md` (matrix\_depth) **too high** can cause your TPU/VM to run out of memory (OOM). The script will attempt to catch this error and skip the test, but it is best to start with lower values if you are unsure.
