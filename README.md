@@ -6,6 +6,7 @@
 This project provides a comprehensive benchmark script designed to measure and analyze the performance of JAX on Google Cloud TPUs. It focuses on 2D matrix and 3D tensor computations, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
 - I was invited to participate in the TPU research and development for the TRC project.
 - Since there is a lot of competition for resources here, I got v4-8.
+- And I tested using 300$ credit with v3-8 , v2-8
 - Actually, there are other chips but I can't ask for them because they are full.
 ## ✨ Key Features
 
