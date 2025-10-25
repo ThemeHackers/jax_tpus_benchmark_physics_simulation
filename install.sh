@@ -28,7 +28,7 @@ export PATH="$PYTHON_PATH/bin:$PATH"
 
 echo "Python $PYTHON_VERSION installed to $PYTHON_PATH"
 
-sudo cp /opt/python-3.13.9/bin/python3.13 /usr/bin/local
+sudo cp /opt/python-3.10.12/bin/python3.10 /usr/bin/local
 
 export VENV_NAME=".venv"
 echo "Creating and activating virtual environment: $VENV_NAME"
@@ -62,6 +62,7 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
 
 
 
