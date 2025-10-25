@@ -51,7 +51,7 @@ pip install torch torch_xla[tpu] -f https://storage.googleapis.com/libtpu-releas
 pip install "transformers<5.8"
 
 
-pip install jax>=0.7.1 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf
+pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf
 
 pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
@@ -63,6 +63,7 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
 
 
 
