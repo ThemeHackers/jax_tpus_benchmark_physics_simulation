@@ -39,7 +39,7 @@ echo "Creating and activating virtual environment: $VENV_NAME"
 source "$VENV_NAME/bin/activate"
 
 echo "Active Python version:"
-python --version
+python3 --version
 
 echo "Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)..."
 
@@ -63,6 +63,7 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
 
 
 
