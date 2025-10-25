@@ -1,7 +1,7 @@
 
 -----
 
-# JAX TPU Benchmark 🚀
+# JAX TPU Benchmark & Physics Simulation 🚀
 
 This project provides a comprehensive benchmark script designed to measure and analyze the performance of JAX on Google Cloud TPUs. It focuses on 2D matrix and 3D tensor computations, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
 - I was invited to participate in the TPU research and development for the TRC project.
