@@ -5,7 +5,7 @@
 
 This project provides a comprehensive benchmark script designed to measure and analyze the performance of JAX on Google Cloud TPUs. It focuses on 2D matrix and 3D tensor computations, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
 - I was invited to participate in the TPU research and development for the TRC project.
-- Since there is a lot of competition for resources here, I got v4-8. (The chip is included in the project so it's free.)
+- Since there is a lot of competition for resources here, I got v4-8 (Immediately) , v4-32 (Queued Resources). (The chip is included in the project so it's free.)
 - And I tested using 300$ credit with v3-8 , v2-8. (Chips from using 300$ credits)
 - So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
 - Actually, there are other chips but I can't ask for them because they are full.
