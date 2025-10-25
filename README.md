@@ -7,6 +7,7 @@ This project provides a comprehensive benchmark script designed to measure and a
 - I was invited to participate in the TPU research and development for the TRC project.
 - Since there is a lot of competition for resources here, I got v4-8.
 - And I tested using 300$ credit with v3-8 , v2-8
+- So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
 - Actually, there are other chips but I can't ask for them because they are full.
 ## ✨ Key Features
 
