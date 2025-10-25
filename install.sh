@@ -10,7 +10,7 @@ sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libns
 sudo apt install -y python3-dev
 
 
-export PYTHON_VERSION="3.13.9"
+export PYTHON_VERSION="3.10.12"
 export PYTHON_PATH="/opt/python-$PYTHON_VERSION"
 
 echo "Downloading and installing Python $PYTHON_VERSION..."
@@ -62,6 +62,7 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
 
 
 
