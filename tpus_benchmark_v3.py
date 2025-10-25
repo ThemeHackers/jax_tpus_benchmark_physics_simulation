@@ -15,7 +15,7 @@ from rich.table import Table
 from rich.panel import Panel
 from utils.check_deps import check_dependencies 
 from utils.jax_devices import list_jax_devices 
-import csv  # Added for CSV support
+import csv  
 
 try:
     from utils.plt import plot_results
@@ -48,7 +48,7 @@ PRECISION = jnp.bfloat16 if args.precision == "bfloat16" else jnp.float32
 
 N = MATRIX_SIZE
 
-# Heuristic GFLOPs estimate for the base dense op (kept from your original)
+
 GFLOPs_BASE_OPERATION = (2 * N**3 * 2)
 GFLOPs_MULTIPLIER = GFLOPs_BASE_OPERATION * 1.1
 
@@ -121,7 +121,7 @@ def get_system_info():
     console.print(table)
     console.print()
 
-# --- JIT / PMAP ops (as before) ---
+
 @jax.jit
 def op_2d(a, b):
     C = jnp.dot(a, b)
@@ -188,7 +188,7 @@ def benchmark_jax_2d(num_cores_to_use: int):
             x = jax.random.normal(keys[0], shape, dtype=PRECISION)
             y = jax.random.normal(keys[1], shape, dtype=PRECISION)
         else:
-            # pmap over leading axis (cores)
+ 
             compiled_op = jax.pmap(op_2d)
             shape = (num_cores_to_use, MATRIX_SIZE, MATRIX_SIZE)
             shape_per_core = (MATRIX_SIZE, MATRIX_SIZE)
@@ -309,12 +309,12 @@ def benchmark_jax_3d(num_cores_to_use: int):
         if "RESOURCE_EXHAUSTED" in error_msg or "OOM" in error_msg:
             console.print(f"[red]OOM Error: Failed to allocate or execute 3D tensor operations.[/red]")
             console.print(f"[yellow]The 3D MATRIX_DEPTH ({MATRIX_DEPTH}) is too large for the available accelerator memory.[/yellow]")
-            # Suggest smaller depths (derived from divisors)
+
             original_depth = MATRIX_DEPTH
             suggestion_table = Table(title="Suggested '-md' values to try")
             suggestion_table.add_column("Command Line Flag", style="cyan")
             suggestion_table.add_column("Reason", style="dim")
-            # pick divisors that produce reasonable per-core depth
+ 
             for d in [2, 4, 8, 16, 32]:
                 if original_depth // d >= 1:
                     suggestion_table.add_row(f"-md {original_depth // d}", f"(Original {original_depth} // {d})")
@@ -356,9 +356,7 @@ def benchmark_bandwidth(num_cores_to_use: int):
     mode = f"{num_cores_to_use}-Core ({'JIT' if num_cores_to_use == 1 else 'PMAP'})"
     console.print(Panel.fit(f"[magenta]JAX Memory Bandwidth Benchmark ({mode})[/magenta]"))
 
-    # Cap the bandwidth size to avoid accidental OOM on small devices.
-    # Original size was huge: 1024*1024*256 (~268M elements) -> can be too big
-    MAX_ELEM_PER_CORE = 64 * 1024 * 1024  # 64M elements per core (heuristic cap)
+    MAX_ELEM_PER_CORE = 64 * 1024 * 1024  
     requested_total = 1024 * 1024 * 256
     if num_cores_to_use > 1:
         per_core = min(MAX_ELEM_PER_CORE, requested_total // num_cores_to_use)
@@ -613,11 +611,11 @@ def compute_core_candidates(max_test_cores: int):
             break
     if max_test_cores not in candidates and max_test_cores >= 1:
         candidates.add(max_test_cores)
-    # Sort ascending
+
     core_list = sorted(list(candidates))
-    # Cap to available devices
+
     core_list = [c for c in core_list if c <= NUM_AVAILABLE_CORES] if NUM_AVAILABLE_CORES > 0 else core_list
-    # Final safety: drop any core values <= 0
+
     core_list = [c for c in core_list if c > 0]
     return core_list
 
@@ -675,7 +673,7 @@ def main():
 
     console.print(Panel.fit("[green]Preparing benchmarks for available core counts.[/green]"))
 
-    # Determine max_test_cores
+
     if args.max_cores > 0:
         max_test_cores = args.max_cores
         if NUM_AVAILABLE_CORES > 0 and args.max_cores > NUM_AVAILABLE_CORES:
@@ -706,7 +704,7 @@ def main():
 
     console.print()
     if all_results:
-        # CSV Export
+  
         if args.csv:
             try:
                 fieldnames = list(set().union(*(d.keys() for d in all_results)))
@@ -714,7 +712,7 @@ def main():
                     writer = csv.DictWriter(f, fieldnames=fieldnames)
                     writer.writeheader()
                     for res in all_results:
-                        # Ensure all fields are present (fill missing with empty string)
+                     
                         row = {k: res.get(k, '') for k in fieldnames}
                         writer.writerow(row)
                 console.print(f"[green]Benchmark results exported to [bold]{args.csv}[/bold][/green]")
