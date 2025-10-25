@@ -23,7 +23,7 @@ cd Python-$PYTHON_VERSION
 make -j$(nproc)
 sudo make install
 cd ..
-rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
+sudo rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
 
 export PATH="$PYTHON_PATH/bin:$PATH"
 
@@ -61,5 +61,6 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
 
 
