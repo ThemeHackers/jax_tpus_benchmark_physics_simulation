@@ -44,8 +44,7 @@ echo "Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)..."
 pip install --upgrade pip
 
 
-pip install "torch~=2.4.0" "torch_xla[tpu]~=2.8" -f https://storage.googleapis.com/libtpu-releases/index.html
-
+pip install torch torch_xla[tpu] -f https://storage.googleapis.com/libtpu-releases/index.html
 
 pip install "transformers<5.8"
 
@@ -62,3 +61,4 @@ pip check
 echo "Installation complete. The virtual environment '$VENV_NAME' is active."
 echo "Note: For TPU runtime, ensure you're on a Google Cloud TPU VM or Colab with TPU enabled."
 echo "Latest versions checked as of Oct 2025: Python 3.13.9, PyTorch/XLA 2.8, JAX 0.7.1."
+
