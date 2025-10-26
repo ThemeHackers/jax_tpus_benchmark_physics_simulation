@@ -223,7 +223,7 @@ python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 200
   * `--Ex` (float, default: 0.0): Electric field strength (X-axis).
   * `--Ey` (float, default: 0.0): Electric field strength (Y-axis).
 
-### 3. Physics: Quantum Monte Carlo (`vmc_dmc_jax_quantum_harmonic_oscillator.py`)
+### 5. Physics: Quantum Monte Carlo (`vmc_dmc_jax_quantum_harmonic_oscillator.py`)
 
 This script implements Variational Monte Carlo (VMC) followed by Diffusion Monte Carlo (DMC) to approximate the ground state energy and wavefunction of a D-dimensional isotropic quantum harmonic oscillator using JAX for high-performance computation. It optimizes a variational parameter α via stochastic gradient descent in VMC, then refines the distribution via branching diffusion in DMC. Outputs include energy convergence plots, marginal probability density histograms vs. exact ground state, and optional GIF animations of walker distributions.
 
