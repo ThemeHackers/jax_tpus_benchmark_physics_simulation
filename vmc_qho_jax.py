@@ -25,17 +25,20 @@ def main(args):
     LEARNING_RATE = args.lr
     N_DMC_STEPS = args.n_dmc
     DMC_DT = args.dmc_dt
+    DIM = args.dim
 
     def potential_energy(x):
-        return 0.5 * x**2
+        return 0.5 * jnp.sum(x**2, axis=-1)
 
     def log_psi_fun(x, alpha):
-        return -alpha * x**2
+        return -alpha * jnp.sum(x**2, axis=-1)
 
     def kinetic_energy(x, alpha):
-        psi = lambda x_input: jnp.exp(log_psi_fun(x_input, alpha))
-        laplacian_psi = grad(grad(psi, argnums=0), argnums=0)(x)
-        return -0.5 * laplacian_psi / psi(x)
+        r2 = jnp.sum(x**2, axis=-1)
+        laplacian_log_psi = -2.0 * alpha * DIM
+        grad_log_psi_norm_sq = 4.0 * alpha**2 * r2
+        ke = -0.5 * (laplacian_log_psi + grad_log_psi_norm_sq)
+        return ke
 
     @jit
     def local_energy(x, alpha):
@@ -46,20 +49,20 @@ def main(args):
     grad_log_psi_alpha = jit(grad(log_psi_fun, argnums=1))
 
     @jit
-    def metropolis_step(walkers, alpha, key):
+    def metropolis_step(walker, alpha, key):
         key, subkey = random.split(key)
-        proposed_walkers = walkers + STEP_SIZE * random.uniform(subkey, shape=walkers.shape, minval=-0.5, maxval=0.5)
+        proposed_walker = walker + STEP_SIZE * random.uniform(subkey, shape=walker.shape, minval=-0.5, maxval=0.5)
         
-        log_prob_new = 2.0 * log_psi_fun(proposed_walkers, alpha)
-        log_prob_old = 2.0 * log_psi_fun(walkers, alpha)
+        log_prob_new = 2.0 * log_psi_fun(proposed_walker, alpha)
+        log_prob_old = 2.0 * log_psi_fun(walker, alpha)
         
         key, subkey = random.split(key)
         acceptance_prob = jnp.exp(log_prob_new - log_prob_old)
-        accept = random.uniform(subkey, shape=walkers.shape) < acceptance_prob
+        accept = random.uniform(subkey, shape=()) < acceptance_prob
         
-        new_walkers = jnp.where(accept, proposed_walkers, walkers)
+        new_walker = jnp.where(accept, proposed_walker, walker)
         
-        return new_walkers, key
+        return new_walker, key
 
     vmap_metropolis_step = vmap(metropolis_step, in_axes=(0, None, 0))
 
@@ -93,9 +96,10 @@ def main(args):
         new_state = (walkers, new_alpha, key, new_opt_state)
         return new_state, E_mean, grad_E
 
-    console.print(Rule("[bold cyan]Variational Monte Carlo (VMC) Simulation[/bold cyan]"))
+    console.print(Rule(f"[bold cyan]Variational Monte Carlo (VMC) Simulation for {DIM}D[/bold cyan]"))
     param_str = (
         f"[bold]N_WALKERS[/bold] = [magenta]{N_WALKERS}[/magenta]\n"
+        f"[bold]DIM[/bold]        = [magenta]{DIM}[/magenta]\n"
         f"[bold]N_EPOCHS[/bold]  = [magenta]{N_EPOCHS}[/magenta]\n"
         f"[bold]N_EQUIL[/bold]   = [magenta]{N_EQUIL_STEPS}[/magenta]\n"
         f"[bold]STEP_SIZE[/bold] = [magenta]{STEP_SIZE}[/magenta]\n"
@@ -105,7 +109,7 @@ def main(args):
 
     key = random.PRNGKey(42)
     key, subkey = random.split(key)
-    walkers = random.normal(subkey, shape=(N_WALKERS,))
+    walkers = random.normal(subkey, shape=(N_WALKERS, DIM))
     alpha_init = 1.0
 
     optimizer = optax.adam(LEARNING_RATE)
@@ -120,8 +124,9 @@ def main(args):
         os.makedirs(VMC_FRAMES_DIR, exist_ok=True)
         
     x_theory = np.linspace(-3.5, 3.5, 300)
-    psi_sq_theory = norm.pdf(x_theory, 0, 1/np.sqrt(2*0.5))**2
-    psi_sq_theory = psi_sq_theory / np.trapezoid(psi_sq_theory, x_theory)
+    sigma = 1 / np.sqrt(2)
+    psi_sq_theory = norm.pdf(x_theory, 0, sigma)
+    psi_sq_theory /= np.trapezoid(psi_sq_theory, x_theory)
 
     current_state = (walkers, alpha_init, key, opt_state)
 
@@ -153,8 +158,8 @@ def main(args):
                 vmc_frame_files.append(filename)
                 
                 plt.figure(figsize=(10, 6))
-                plt.hist(np.array(current_state[0]), bins=50, density=True, label=f'VMC Walkers (Epoch {epoch})', alpha=0.7)
-                plt.plot(x_theory, psi_sq_theory, 'r-', linewidth=2, label='Exact $|\Psi_0|^2$')
+                plt.hist(np.array(current_state[0][:, 0]), bins=50, density=True, label=f'VMC Walkers (Epoch {epoch})', alpha=0.7)
+                plt.plot(x_theory, psi_sq_theory, 'r-', linewidth=2, label='Exact Marginal $|\Psi_0|^2$ (x-coordinate)')
                 plt.title(f'VMC Epoch {epoch:04d} | $\\alpha$ = {current_state[1]:.4f} | E = {energy:.4f}')
                 plt.xlabel('Position (x)')
                 plt.ylabel('Probability Density $|\Psi(x)|^2$')
@@ -165,7 +170,8 @@ def main(args):
                 plt.close()
 
     console.print(Rule("[bold green]VMC Simulation Finished[/bold green]"))
-    console.print(f"Analytical solution: E_0 = 0.5, alpha = 0.5")
+    E_analytical = DIM * 0.5
+    console.print(f"Analytical solution: E_0 = {E_analytical}, alpha = 0.5")
     console.print(f"VMC result:          [bold green]E_0 = {energies_history[-1]:.6f}, alpha = {alpha_history[-1]:.6f}[/bold green]")
 
     if not args.no_gif:
@@ -178,10 +184,10 @@ def main(args):
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     ax1.plot(energies_history, label='VMC Energy')
-    ax1.axhline(y=0.5, color='r', linestyle='--', label='Exact $E_0 = 0.5$')
+    ax1.axhline(y=E_analytical, color='r', linestyle='--', label=f'Exact $E_0 = {E_analytical}$')
     ax1.set_ylabel('Energy')
     ax1.legend()
-    ax1.set_title('VMC Optimization of 1D Quantum Harmonic Oscillator')
+    ax1.set_title(f'VMC Optimization of {DIM}D Quantum Harmonic Oscillator')
     ax2.plot(alpha_history, label='$\\alpha$ value')
     ax2.axhline(y=0.5, color='r', linestyle='--', label='Exact $\\alpha = 0.5$')
     ax2.set_xlabel('Epoch')
@@ -199,16 +205,16 @@ def main(args):
     final_alpha_vmc = current_state[1]
 
     plt.figure(figsize=(10, 6))
-    plt.hist(np.array(final_walkers_vmc), bins=50, density=True, label=f'VMC Walkers (alpha={final_alpha_vmc:.3f})')
-    plt.plot(x_theory_final_plot, psi_sq_theory_final_plot, 'r-', label='Exact $|\Psi_0|^2 = e^{-x^2}$')
-    plt.title('Final VMC Walker Distribution vs. Exact Ground State')
+    plt.hist(np.array(final_walkers_vmc[:, 0]), bins=50, density=True, label=f'VMC Walkers (alpha={final_alpha_vmc:.3f})')
+    plt.plot(x_theory_final_plot, psi_sq_theory_final_plot, 'r-', label='Exact Marginal $|\Psi_0|^2$ (x-coordinate)')
+    plt.title('Final VMC Walker Distribution vs. Exact Ground State Marginal')
     plt.xlabel('Position (x)')
     plt.ylabel('Probability Density $|\Psi(x)|^2$')
     plt.legend()
     if not args.no_plot:
         plt.show()
 
-    console.print(Rule("[bold cyan]Diffusion Monte Carlo (DMC) Simulation[/bold cyan]"))
+    console.print(Rule(f"[bold cyan]Diffusion Monte Carlo (DMC) Simulation for {DIM}D[/bold cyan]"))
 
     ALPHA_BEST = alpha_history[-1]
     WALKERS_DMC_INIT = current_state[0]
@@ -221,7 +227,9 @@ def main(args):
     )
     console.print(Panel(param_str_dmc, title="DMC Parameters", expand=False))
 
-    grad_log_psi_x = jit(grad(log_psi_fun, argnums=0))
+    def grad_log_psi_x(x, alpha):
+        return -2.0 * alpha * x
+
     drift_force_fun = lambda x, alpha: 2.0 * grad_log_psi_x(x, alpha)
     vmap_drift_force = vmap(drift_force_fun, in_axes=(0, None))
 
@@ -256,7 +264,7 @@ def main(args):
         drift_force = vmap_drift_force(resampled_walkers, ALPHA_BEST)
         drift_move = drift_force * DMC_DT
         
-        diffusion_move = random.normal(key_diff, shape=(N_WALKERS,)) * jnp.sqrt(DMC_DT)
+        diffusion_move = random.normal(key_diff, shape=(N_WALKERS, DIM)) * jnp.sqrt(DMC_DT)
         
         new_walkers = resampled_walkers + drift_move + diffusion_move
         
@@ -286,8 +294,8 @@ def main(args):
                     dmc_frame_files.append(filename)
                     
                     plt.figure(figsize=(10, 6))
-                    plt.hist(np.array(dmc_walkers_history[i]), bins=50, density=True, label=f'DMC Walkers (Step {i})', alpha=0.7, color='green')
-                    plt.plot(x_theory, psi_sq_theory, 'r-', linewidth=2, label='Exact $|\Psi_0|^2$')
+                    plt.hist(np.array(dmc_walkers_history[i][:, 0]), bins=50, density=True, label=f'DMC Walkers (Step {i})', alpha=0.7, color='green')
+                    plt.plot(x_theory, psi_sq_theory, 'r-', linewidth=2, label='Exact Marginal $|\Psi_0|^2$')
                     plt.title(f'DMC Step {i:04d} | $E_{{ref}}$ = {dmc_energy_history[i]:.4f}')
                     plt.xlabel('Position (x)')
                     plt.ylabel('Probability Density $|\Psi(x)|^2$')
@@ -314,10 +322,10 @@ def main(args):
 
     plt.axhline(y=dmc_mean_energy, color='b', linestyle='--', 
                 label=f'DMC Mean = {dmc_mean_energy:.6f} $\\pm$ {dmc_std_error:.6f}')
-    plt.axhline(y=0.5, color='r', linestyle=':', label='Exact $E_0 = 0.5$')
+    plt.axhline(y=E_analytical, color='r', linestyle=':', label=f'Exact $E_0 = {E_analytical}$')
     plt.xlabel('DMC Step')
     plt.ylabel('Energy ($E_{{ref}}$)')
-    plt.title('DMC Ground State Energy')
+    plt.title(f'DMC Ground State Energy for {DIM}D')
     plt.legend()
     if not args.no_plot:
         plt.show()
@@ -325,11 +333,11 @@ def main(args):
     plt.figure(figsize=(10, 6))
     final_dmc_walkers, _ = final_dmc_state
 
-    plt.hist(np.array(final_walkers_vmc), bins=50, density=True, label=f'VMC Walkers (Final)', alpha=0.6)
-    plt.hist(np.array(final_dmc_walkers), bins=50, density=True, label=f'DMC Walkers (Final)', alpha=0.6, color='green')
+    plt.hist(np.array(final_walkers_vmc[:, 0]), bins=50, density=True, label=f'VMC Walkers (Final)', alpha=0.6)
+    plt.hist(np.array(final_dmc_walkers[:, 0]), bins=50, density=True, label=f'DMC Walkers (Final)', alpha=0.6, color='green')
 
-    plt.plot(x_theory_final_plot, psi_sq_theory_final_plot, 'r-', linewidth=2, label='Exact $|\Psi_0|^2$')
-    plt.title('Final Walker Distribution (VMC vs DMC vs Exact)')
+    plt.plot(x_theory_final_plot, psi_sq_theory_final_plot, 'r-', linewidth=2, label='Exact Marginal $|\Psi_0|^2$')
+    plt.title('Final Walker Distribution Marginal (VMC vs DMC vs Exact)')
     plt.xlabel('Position (x)')
     plt.ylabel('Probability Density $|\Psi(x)|^2$')
     plt.legend()
@@ -337,7 +345,7 @@ def main(args):
         plt.show()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="JAX VMC+DMC for 1D Quantum Harmonic Oscillator")
+    parser = argparse.ArgumentParser(description="JAX VMC+DMC for D-Dimensional Quantum Harmonic Oscillator")
     parser.add_argument('--n_walkers', type=int, default=10000, help='Number of walkers')
     parser.add_argument('--n_epochs', type=int, default=3000, help='Number of VMC optimization epochs')
     parser.add_argument('--n_equil', type=int, default=100, help='Number of equilibration steps per epoch')
@@ -345,6 +353,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=0.02, help='Learning rate for VMC optimizer')
     parser.add_argument('--n_dmc', type=int, default=500, help='Number of DMC steps')
     parser.add_argument('--dmc_dt', type=float, default=0.01, help='Time step for DMC')
+    parser.add_argument('--dim', type=int, default=3, help='Dimension')
     parser.add_argument('--no-gif', action='store_true', help='Disable GIF generation')
     parser.add_argument('--no-plot', action='store_true', help='Disable showing matplotlib plots')
     
