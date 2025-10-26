@@ -7,7 +7,7 @@ This project provides a comprehensive benchmark script (`tpus_benchmark_v3.py`) 
 This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim.py`) and a Molecular Dynamics simulation (`molecular_dynamics_jax.py`).
 
   - I was invited to participate in the TPU research and development for the TRC project.
-  - Since there is a lot of competition for resources here, I got v4-8 (Immediately) , v4-32 (Queued Resources). (The chip is included in the project so it's free.)
+  - Since there is a lot of competition for resources here, I got v4-8 (Immediately). (The chip is included in the project so it's free.)
   - And I tested using 300$ credit with v3-8 , v2-8. (Chips from using 300$ credits)
   - So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
   - Actually, there are other chips but I can't ask for them because they are full.
