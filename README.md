@@ -117,7 +117,6 @@ pip check
   * `rich` (for console UI)
   * `matplotlib` & `pandas` (for plotting results)
   * `jax-md`
-  * **Note:** `nbody_bh_merger_sim.py` also requires `scipy`. You may need to install it separately: `pip install scipy`.
 
 -----
 
