@@ -113,59 +113,117 @@ After installing the dependencies and activating the virtual environment, you ca
 
 ### 1\. Main Benchmark (`tpus_benchmark_single-host_workload.py`)
 
+This script is for benchmarking TPU performance. It tests various operations (2D/3D Matrix, 2D/3D FFT, Bandwidth) and scaling across multiple cores (JIT vs. PMAP).
+
 **Default execution:**
-This will run the benchmark with default settings (10 warmup, 1000 steps, 16384 matrix size, 128 matrix depth).
+(Uses default settings: 10 warmup, 1000 steps, 16384 matrix size, 128 matrix depth)
 
 ```bash
 python3 tpus_benchmark_single-host_workload.py
 ```
 
-**Custom execution:**
-This example runs a lighter workload with 5 warmup steps, 500 test steps, an 8192x8192 matrix size, and a depth of 64.
+**Custom execution (lighter workload):**
+(Example: 5 warmup, 500 test steps, 8192x8192 matrix size, and 64 depth)
 
 ```bash
 python3 tpus_benchmark_single-host_workload.py -w 5 -m 500 -mxs 8192 -md 64
 ```
 
-**Export to CSV:**
-This example runs a test up to 8 cores and saves the results to `results.csv`.
+**Run and Export to CSV:**
+(Example: Test up to 8 cores and save results to `results.csv`)
 
 ```bash
 python3 tpus_benchmark_single-host_workload.py --max_cores 8 --csv results.csv
 ```
 
-### 2\. Physics Simulations (Single-Host)
+**All Arguments:**
 
-**N-Body Black Hole Merger (Interactive):**
-This script will prompt you for parameters (number of bodies, mass, etc.) in the console.
+  * `-w` / `--warmup` (int, default: 10): The number of "warmup" runs before starting the actual benchmark.
+  * `-m` / `--steps` (int, default: 1000): The number of test iterations to average for the results.
+  * `-mxs` / `--matrix_size` (int, default: 16384): The size (N) for `(N, N)` matrices.
+  * `-md` / `--matrix_depth` (int, default: 128): The depth (D) for 3D tensors `(D, N, N)`.
+  * `-c` / `--conv_size` (int, default: 256): The size of the convolution input.
+  * `-b` / `--batch_size` (int, default: 32): The batch size.
+  * `--precision` (str, default: "float32"): The data precision to use (`float32` or `bfloat16`).
+  * `--max_cores` (int, default: 0): The maximum number of cores to test (0 = auto-detect all available).
+  * `--csv` (str, default: None): The filename to output results to a CSV file (e.g., `--csv results.csv`).
+
+### 2\. Physics: N-Body Black Hole Merger (`nbody_bh_merger_sim_single-host_workload.py`)
+
+This script simulates an N-body (e.g., 3-body) black hole merger and generates gravitational waveforms (GW). This script is **interactive** and will prompt you for parameters in the console instead of using arguments.
+
+**How to Run:**
 
 ```bash
 python3 nbody_bh_merger_sim_single-host_workload.py
 ```
 
-**Molecular Dynamics:**
-You can run this with default parameters or specify your own.
+**Parameters you will be prompted for:**
+
+  * `Number of black holes` (int, default: 3): Number of black holes (2-5 recommended).
+  * `Mass of BH{i+1} (M☉)` (float, default: 30.0): Mass for each black hole.
+  * `Typical initial separation` (float, default: 100.0): Typical initial distance.
+  * `Typical initial velocity (v/c)` (float, default: 0.1): Typical initial velocity (as a fraction of c).
+  * `Simulation time` (float, default: 200.0): Total simulation time.
+  * `GW observer distance (Mpc)` (float, default: 410.0): Distance to the GW observer (in Mpc).
+  * `Compute Lyapunov exponent for chaos? (y/n)` (str, default: "y"): Whether to compute the Lyapunov exponent for chaos analysis.
+
+### 3\. Physics: Molecular Dynamics (`molecular_dynamics_jax_single-host_workload.py`)
+
+This script simulates the molecular dynamics (MD) of a 2D Lennard-Jones fluid using pure JAX.
+
+**Default execution:**
+(N=400, 10k eq\_steps, 10k prod\_steps)
 
 ```bash
-# Run with defaults (N=400, 10k eq_steps, 10k prod_steps)
 python3 molecular_dynamics_jax_single-host_workload.py
+```
 
-# Run a longer production simulation
+**Custom execution (longer run):**
+
+```bash
 python3 molecular_dynamics_jax_single-host_workload.py --prod_steps 50000 --eq_steps 20000
 ```
 
-**Three-Particle EM Simulation:**
-You can run this with default parameters or specify your own.
+**All Arguments:**
+
+  * `--N` (int, default: 400): Number of particles.
+  * `--rho` (float, default: 0.8): Density.
+  * `--kT` (float, default: 1.0): Temperature (kT).
+  * `--dt` (float, default: 1e-3): Time step size.
+  * `--eq_steps` (int, default: 10000): Number of equilibration steps.
+  * `--prod_steps` (int, default: 10000): Number of production (simulation) steps.
+  * `--sample_every` (int, default: 100): Sample the state every N steps.
+  * `--seed` (int, default: 42): PRNG seed.
+  * `--output` (str, default: "g\_r\_plot.png"): Output filename for the g(r) plot.
+
+### 4\. Physics: Three-Particle EM Simulation (`three_particles_em_nonuni_single-host_workload.py`)
+
+This script simulates three particles under gravity and a non-uniform electromagnetic field.
+
+**Default execution:**
 
 ```bash
-# Run with defaults
 python3 three_particles_em_nonuni_single-host_workload.py
+```
 
-# Run with custom parameters (e.g., higher B-field, more steps)
+**Custom execution (stronger B-field, more steps):**
+
+```bash
 python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 2000
 ```
 
-**Note:** The `--matrix_depth` (`-md`) value for the main benchmark must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v4-8). The script will skip tests that do not meet this requirement.
+**All Arguments:**
+
+  * `--dt` (float, default: 0.01): Time step size.
+  * `--n_steps` (int, default: 1000): Total number of steps to simulate.
+  * `--G` (float, default: 1.0): Gravitational constant.
+  * `--Bz` (float, default: 1.0): Constant component of the magnetic field (Z-axis).
+  * `--Bk` (float, default: 0.0): Gradient of the magnetic field along x (Bz = Bz + Bk\*x).
+  * `--Ex` (float, default: 0.0): Electric field strength (X-axis).
+  * `--Ey` (float, default: 0.0): Electric field strength (Y-axis).
+
+**Note:** For the main benchmark (`tpus_benchmark_single-host_workload.py`), the `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8). The script will automatically skip tests that do not meet this requirement.
 
 -----
 
