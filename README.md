@@ -12,7 +12,9 @@ This project also includes several physics simulation scripts accelerated with J
   - There are actually other chips, but I couldn't request them because they were already full.
   - And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think
   - The specified chip is a single-host workload type, so tpus\_benchmark\_single-host\_workload.py can be used for testing.
-
+## How to Create TPU
+- Select according to the TRC project support.
+- And most importantly, choose the TPU software version as tpu-ubuntu2204-base.
 ## ✨ Key Features
 
   * **Multi-Mode Benchmarking:** Tests a diverse set of operations:
