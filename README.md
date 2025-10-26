@@ -223,9 +223,35 @@ python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 200
   * `--Ex` (float, default: 0.0): Electric field strength (X-axis).
   * `--Ey` (float, default: 0.0): Electric field strength (Y-axis).
 
-### 5\. Physics: Variational Monte Carlo (VMC) and Diffusion Monte Carlo (DMC) Simulation using JAX for nD Quantum Harmonic Oscillator (`vmc_qho_jax.py`)
+### 3. Physics: Quantum Monte Carlo (`vmc_dmc_jax_quantum_harmonic_oscillator.py`)
 
-wait
+This script implements Variational Monte Carlo (VMC) followed by Diffusion Monte Carlo (DMC) to approximate the ground state energy and wavefunction of a D-dimensional isotropic quantum harmonic oscillator using JAX for high-performance computation. It optimizes a variational parameter α via stochastic gradient descent in VMC, then refines the distribution via branching diffusion in DMC. Outputs include energy convergence plots, marginal probability density histograms vs. exact ground state, and optional GIF animations of walker distributions.
+
+**Default execution:**  
+(N=10k walkers, 3k VMC epochs, 100 eq_steps/epoch, 500 DMC steps, 3D)
+
+```bash
+python3 vmc_dmc_jax_quantum_harmonic_oscillator.py
+```
+
+**Custom execution (longer run):**  
+
+```bash
+python3 vmc_dmc_jax_quantum_harmonic_oscillator.py --n_epochs 5000 --n_dmc 1000 --dim 1
+```
+
+**All Arguments:**
+
+  * `--n_walkers` (int, default: 10000): Number of Monte Carlo walkers.
+  * `--n_epochs` (int, default: 3000): Number of VMC optimization epochs.
+  * `--n_equil` (int, default: 100): Number of equilibration steps per VMC epoch.
+  * `--step_size` (float, default: 2.0): Proposal step size for Metropolis-Hastings sampling.
+  * `--lr` (float, default: 0.02): Learning rate for Adam optimizer in VMC.
+  * `--n_dmc` (int, default: 500): Number of DMC propagation steps.
+  * `--dmc_dt` (float, default: 0.01): Time step size for DMC diffusion/branching.
+  * `--dim` (int, default: 3): Spatial dimensionality of the harmonic oscillator.
+  * `--no-gif` (flag): Disable generation of VMC and DMC animation GIFs (`vmc_animation.gif` and `dmc_animation.gif`).
+  * `--no-plot` (flag): Disable display of final matplotlib plots (energy convergence, histograms).
 
 **Note:** For the main benchmark (`tpus_benchmark_single-host_workload.py`), the `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8). The script will automatically skip tests that do not meet this requirement.
 
