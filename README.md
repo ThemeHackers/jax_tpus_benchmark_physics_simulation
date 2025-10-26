@@ -47,7 +47,7 @@ This project also includes several physics simulation scripts accelerated with J
 
 ## 🛠️ Installation (So far I have tested it working fine with the chip and no issues.)
 
-The `install.sh` script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs Python 3.13.9, `jax` with TPU support, `torch_xla`, and the other required Python packages.
+The `install.sh` script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs Python 3.10.12, `jax` with TPU support, `torch_xla`, and the other required Python packages.
 
 ```bash
 sudo apt update -y
@@ -57,7 +57,7 @@ sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libns
 
 sudo apt install -y python3-dev
 
-export PYTHON_VERSION="3.13.9"
+export PYTHON_VERSION="3.10.12"
 export PYTHON_PATH="/opt/python-$PYTHON_VERSION"
 
 wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
@@ -71,9 +71,9 @@ cd ..
 sudo rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
 export PATH="$PYTHON_PATH/bin:$PATH"
 
-sudo cp $PYTHON_PATH/bin/python3.13 /usr/bin/local
+sudo cp $PYTHON_PATH/bin/python3.10 /usr/bin/local
 sudo cp $PYTHON_PATH/bin/pip3 /usr/bin/local
-sudo cp $PYTHON_PATH/bin/pip3.13 /usr/bin/local
+sudo cp $PYTHON_PATH/bin/pip3.10 /usr/bin/local
 
 export VENV_NAME=".venv"
 echo "Creating and activating virtual environment: $VENV_NAME"
