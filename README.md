@@ -2,7 +2,7 @@
 
 # JAX TPU Benchmark & Physics Simulation 🚀
 
-This project provides a comprehensive benchmark script (`tpus_benchmark_v3.py`) designed to measure and analyze the performance of JAX on Google Cloud TPUs. It has been expanded to test a wider variety of computations, including 2D/3D matrix operations, 2D/3D FFT, and memory bandwidth, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
+This project provides a comprehensive benchmark script (`tpus_benchmark_single-host_workload.py`) designed to measure and analyze the performance of JAX on Google Cloud TPUs. It has been expanded to test a wider variety of computations, including 2D/3D matrix operations, 2D/3D FFT, and memory bandwidth, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
 
 This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim.py`) and a Molecular Dynamics simulation (`molecular_dynamics_jax.py`).
 
@@ -121,27 +121,27 @@ pip check
 
 After installing the dependencies and activating the virtual environment, you can run the main benchmark script or the physics simulations.
 
-### 1\. Main Benchmark (`tpus_benchmark_v3.py`)
+### 1\. Main Benchmark (`tpus_benchmark_single-host_workload.py`)
 
 **Default execution:**
 This will run the benchmark with default settings (10 warmup, 1000 steps, 16384 matrix size, 128 matrix depth).
 
 ```bash
-python3 tpus_benchmark_v3.py
+python3 tpus_benchmark_single-host_workload.py
 ```
 
 **Custom execution:**
 This example runs a lighter workload with 5 warmup steps, 500 test steps, an 8192x8192 matrix size, and a depth of 64.
 
 ```bash
-python3 tpus_benchmark_v3.py -w 5 -m 500 -mxs 8192 -md 64
+python3 tpus_benchmark_single-host_workload.py -w 5 -m 500 -mxs 8192 -md 64
 ```
 
 **Export to CSV:**
 This example runs a test up to 8 cores and saves the results to `results.csv`.
 
 ```bash
-python3 tpus_benchmark_v3.py --max_cores 8 --csv results.csv
+python3 tpus_benchmark_single-host_workload.py --max_cores 8 --csv results.csv
 ```
 
 ### 2\. Physics Simulations
