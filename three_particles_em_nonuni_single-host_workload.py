@@ -21,20 +21,35 @@ dt = args.dt
 n_steps = args.n_steps
 
 def acceleration(pos, vel, masses, charges):
-    def pairwise_acc(i):
-        ri = pos[i]
-        acc_grav = jnp.zeros(2)
-        for j in range(len(pos)):
-            if i == j:
-                continue
-            rj = pos[j]
-            r_diff = rj - ri
-            r_norm = jnp.linalg.norm(r_diff)
-            if r_norm < 1e-6:
-                r_norm = 1e-6
-            acc_grav += G * masses[j] * r_diff / (r_norm ** 3)
-        return acc_grav
-    acc_grav = vmap(pairwise_acc)(jnp.arange(len(pos)))
+
+    r_diff = pos[None, :, :] - pos[:, None, :]
+    
+
+    r_norm_sq = jnp.sum(r_diff**2, axis=-1) + jnp.eye(len(pos))
+    
+    r_norm_sq_safe = jnp.where(r_norm_sq < 1e-12, 1e-12, r_norm_sq)
+
+    r_norm_inv_cubed = r_norm_sq_safe**(-1.5)
+    
+    acc_grav_pairs = G * masses[None, :, None] * r_diff * r_norm_inv_cubed[..., None]
+    
+   
+    acc_grav = jnp.sum(acc_grav_pairs, axis=1) 
+    
+    qm = (charges / masses)[:, None]     
+    vx, vy = vel[:, 0], vel[:, 1]        
+    x = pos[:, 0]                       
+    
+    bz = args.Bz + args.Bk * x           
+    
+    acc_mag_x = qm[:, 0] * vy * bz
+    acc_mag_y = qm[:, 0] * -vx * bz
+    acc_mag = jnp.stack([acc_mag_x, acc_mag_y], axis=1) 
+
+    E_field = jnp.array([args.Ex, args.Ey])  
+    acc_elec = qm * E_field[None, :]            
+    
+    return acc_grav + acc_mag + acc_elec
     
     def mag_acc(i):
         qm = charges[i] / masses[i]
@@ -80,12 +95,17 @@ trajectory = simulate(pos_init, vel_init, masses, charges)
 fig, ax = plt.subplots()
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
-lines = [ax.plot([], [], 'o')[0] for _ in range(n_particles)]
+lines, = ax.plot([], [], 'o')
+
 
 def animate(frame):
-    for i, line in enumerate(lines):
-        line.set_data(trajectory[frame][i, 0], trajectory[frame][i, 1])
-    return lines
+    
+    x_data = trajectory[frame, :, 0]
+    y_data = trajectory[frame, :, 1]
+    
+    lines.set_data(x_data, y_data)
+    
+    return lines,
 
 anim = FuncAnimation(fig, animate, frames=n_steps, interval=20, blit=True)
 anim.save('three_particles_em_nonuni.gif', writer='pillow')
