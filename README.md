@@ -53,62 +53,44 @@ This project also includes several physics simulation scripts accelerated with J
 The script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs Python 3.10.x, `jax` with TPU support, `torch_xla`, and the other required Python packages.
 
 ```bash
+-------------- Basic installation --------------
 sudo apt update -y
 sudo apt upgrade -y
-
 sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
-
 sudo apt install -y python3-dev
 sudo apt install -y python3.10-venv
-
+-------------- Basic installation --------------
 
 -------------- Check before installing whether it is python3.10.x or not. --------------
 export PYTHON_VERSION="3.10.x"
 export PYTHON_PATH="/opt/python-$PYTHON_VERSION"
-
 wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
 tar -xf Python-$PYTHON_VERSION.tgz
 cd Python-$PYTHON_VERSION
-
 ./configure --enable-optimizations --prefix=$PYTHON_PATH
 make -j$(nproc)
 sudo make install
 cd ..
 sudo rm -rf Python-$PYTHON_VERSION Python-$PYTHON_VERSION.tgz
 export PATH="$PYTHON_PATH/bin:$PATH"
-
 sudo cp $PYTHON_PATH/bin/python3.10 /usr/bin/local
 sudo cp $PYTHON_PATH/bin/pip3 /usr/bin/local
 sudo cp $PYTHON_PATH/bin/pip3.10 /usr/bin/local
+export VENV_NAME=".venv"
+"$PYTHON_PATH/bin/python3" -m venv "$VENV_NAME"
+source "$VENV_NAME/bin/activate"
+python3 --version
 -------------- Check before installing whether it is python3.10.x or not. --------------
 
-
-export VENV_NAME=".venv"
-echo "Creating and activating virtual environment: $VENV_NAME"
-
-"$PYTHON_PATH/bin/python3" -m venv "$VENV_NAME"
-
-source "$VENV_NAME/bin/activate"
-
-python3 --version
-
-echo "Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)..."
-
+-------------- Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)... --------------
 pip install --upgrade pip
-
-
 pip install torch torch_xla[tpu] -f https://storage.googleapis.com/libtpu-releases/index.html
-
 pip install "transformers<5.8"
-
-
 pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf
-
 pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-
 pip install psutil rich matplotlib pandas jax-md scipy
-
 pip check
+-------------- Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)... --------------
 ```
 
 **Key libraries installed:**
