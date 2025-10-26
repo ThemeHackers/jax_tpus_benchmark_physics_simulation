@@ -45,7 +45,7 @@ This project also includes several physics simulation scripts accelerated with J
 
 -----
 
-## 🛠️ Installation (So far I have tested it working fine with the chip and no issues.)
+## 🛠️ Installation (Check before installing whether it is python3.10.12 or not.)
 
 The `install.sh` script provides the necessary commands to set up the environment for a Google Cloud TPU VM. It installs Python 3.10.12, `jax` with TPU support, `torch_xla`, and the other required Python packages.
 
