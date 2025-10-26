@@ -4,14 +4,14 @@
 
 This project provides a comprehensive benchmark script (`tpus_benchmark_single-host_workload.py`) designed to measure and analyze the performance of JAX on Google Cloud TPUs. It has been expanded to test a wider variety of computations, including 2D/3D matrix operations, 2D/3D FFT, and memory bandwidth, offering insights into performance scaling from single-core (JIT) to multi-core (PMAP) operations.
 
-This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim.py`) and a Molecular Dynamics simulation (`molecular_dynamics_jax.py`).
+This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim_single-host_workload.py`), a Molecular Dynamics simulation (`molecular_dynamics_jax_single-host_workload.py`), and a three-particle simulation in a non-uniform EM field (`three_particles_em_nonuni_single-host_workload.py`).
 
-- I was invited to participate in TPU research and development for the TRC project.
-- Due to the high competition for resources here, I received version v4-8 (right away) (the chip is included in the project, so it's free).
-- I also tested version v3-8 and v2-8 (with a $300 credit).
-- There are actually other chips, but I couldn't request them because they were already full.
-- And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think
-- The specified chip is a single-host workload type, so tpus_benchmark_single-host_workload.py can be used for testing.
+  - I was invited to participate in TPU research and development for the TRC project.
+  - Due to the high competition for resources here, I received version v4-8 (right away) (the chip is included in the project, so it's free).
+  - I also tested version v3-8 and v2-8 (with a $300 credit).
+  - There are actually other chips, but I couldn't request them because they were already full.
+  - And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think
+  - The specified chip is a single-host workload type, so tpus\_benchmark\_single-host\_workload.py can be used for testing.
 
 ## ✨ Key Features
 
@@ -21,8 +21,9 @@ This project also includes several physics simulation scripts accelerated with J
       * 2D & 3D FFT (`jnp.fft.fftn`)
       * Memory Bandwidth (`jnp.copy`, `jnp.sum`)
   * **Physics Simulation Examples:**
-      * **N-Body Black Hole Merger**: Simulates N-body dynamics (e.g., 3-body), generates gravitational waveforms, and computes Lyapunov exponents for chaos analysis using JAX ODE integration.
-      * **Molecular Dynamics**: A pure JAX implementation of a 2D Lennard-Jones fluid simulation using a JIT-compiled Verlet integrator, complete with equilibration and production runs.
+      * **N-Body Black Hole Merger**: Simulates N-body dynamics (e.g., 3-body), generates gravitational waveforms, and computes Lyapunov exponents for chaos analysis using JAX ODE integration (`nbody_bh_merger_sim_single-host_workload.py`).
+      * **Molecular Dynamics**: A pure JAX implementation of a 2D Lennard-Jones fluid simulation using a JIT-compiled Verlet integrator, complete with equilibration and production runs (`molecular_dynamics_jax_single-host_workload.py`).
+      * **Three-Particle EM Simulation**: Simulates three particles under gravity and a non-uniform electromagnetic field (`three_particles_em_nonuni_single-host_workload.py`).
   * **Multi-Core Scaling Analysis:** Automatically runs benchmarks on a single core (using `jax.jit`) and scales up to all available cores (using `jax.pmap`) to evaluate parallel processing efficiency.
   * **System & Device Introspection:**
       * Gathers detailed system information, including OS, CPU, Python version, and total system RAM.
@@ -117,10 +118,11 @@ pip check
   * `rich` (for console UI)
   * `matplotlib` & `pandas` (for plotting results)
   * `jax-md`
+  * `scipy` (for n-body sim)
 
 -----
 
-## 🚀 How to Run
+## 🚀 How to Run (Single-Host Workloads)
 
 After installing the dependencies and activating the virtual environment, you can run the main benchmark script or the physics simulations.
 
@@ -147,13 +149,13 @@ This example runs a test up to 8 cores and saves the results to `results.csv`.
 python3 tpus_benchmark_single-host_workload.py --max_cores 8 --csv results.csv
 ```
 
-### 2\. Physics Simulations
+### 2\. Physics Simulations (Single-Host)
 
 **N-Body Black Hole Merger (Interactive):**
 This script will prompt you for parameters (number of bodies, mass, etc.) in the console.
 
 ```bash
-python3 nbody_bh_merger_sim.py
+python3 nbody_bh_merger_sim_single-host_workload.py
 ```
 
 **Molecular Dynamics:**
@@ -161,14 +163,32 @@ You can run this with default parameters or specify your own.
 
 ```bash
 # Run with defaults (N=400, 10k eq_steps, 10k prod_steps)
-python3 molecular_dynamics_jax.py
+python3 molecular_dynamics_jax_single-host_workload.py
 
 # Run a longer production simulation
-python3 molecular_dynamics_jax.py --prod_steps 50000 --eq_steps 20000
+python3 molecular_dynamics_jax_single-host_workload.py --prod_steps 50000 --eq_steps 20000
+```
+
+**Three-Particle EM Simulation:**
+You can run this with default parameters or specify your own.
+
+```bash
+# Run with defaults
+python3 three_particles_em_nonuni_single-host_workload.py
+
+# Run with custom parameters (e.g., higher B-field, more steps)
+python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 2000
 ```
 
 **Note:** The `--matrix_depth` (`-md`) value for the main benchmark must be divisible by the number of cores being tested (e.g., 1, 4, and 8 if you have a TPU v4-8). The script will skip tests that do not meet this requirement.
 
+-----
+
+## 🚀 How to Run (Multi-Host Workloads)
+
+*(...Instructions for multi-host scripts TBD...)*
+
+-----
 
 ## ⚠️ Parameter Warnings
 
