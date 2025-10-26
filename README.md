@@ -88,7 +88,7 @@ pip install torch torch_xla[tpu] -f https://storage.googleapis.com/libtpu-releas
 pip install "transformers<5.8"
 pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-metadata protobuf
 pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-pip install psutil rich matplotlib pandas jax-md scipy
+pip install psutil rich matplotlib pandas jax-md scipy imageio
 pip check
 -------------- Installing project dependencies (PyTorch/XLA, JAX/TPU, etc.)... --------------
 ```
