@@ -230,7 +230,7 @@ def main(args):
     def grad_log_psi_x(x, alpha):
         return -2.0 * alpha * x
 
-    drift_force_fun = lambda x, alpha: 2.0 * grad_log_psi_x(x, alpha)
+    drift_force_fun = lambda x, alpha: grad_log_psi_x(x, alpha)  
     vmap_drift_force = vmap(drift_force_fun, in_axes=(0, None))
 
     vmap_E_L = vmap(local_energy, in_axes=(0, None))
