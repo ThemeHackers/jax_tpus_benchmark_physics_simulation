@@ -59,7 +59,7 @@ sudo apt upgrade -y
 sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
 
 sudo apt install -y python3-dev
-sudo apt install python3.10-venv
+sudo apt install -y python3.10-venv
 
 
 -------------- Check before installing whether it is python3.10.x or not. --------------
