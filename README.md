@@ -57,6 +57,8 @@ sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libns
 
 sudo apt install -y python3-dev
 
+
+-------------- Check before installing whether it is python3.10.12 or not. --------------
 export PYTHON_VERSION="3.10.12"
 export PYTHON_PATH="/opt/python-$PYTHON_VERSION"
 
@@ -74,6 +76,8 @@ export PATH="$PYTHON_PATH/bin:$PATH"
 sudo cp $PYTHON_PATH/bin/python3.10 /usr/bin/local
 sudo cp $PYTHON_PATH/bin/pip3 /usr/bin/local
 sudo cp $PYTHON_PATH/bin/pip3.10 /usr/bin/local
+-------------- Check before installing whether it is python3.10.12 or not. --------------
+
 
 export VENV_NAME=".venv"
 echo "Creating and activating virtual environment: $VENV_NAME"
