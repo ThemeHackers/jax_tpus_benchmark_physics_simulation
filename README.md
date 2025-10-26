@@ -223,7 +223,7 @@ python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 200
   * `--Ex` (float, default: 0.0): Electric field strength (X-axis).
   * `--Ey` (float, default: 0.0): Electric field strength (Y-axis).
 
-### 5\. Physics: Variational Monte Carlo (VMC) and Diffusion Monte Carlo (DMC) Simulation using JAX for 1-3D Quantum Harmonic Oscillator (`vmc_qho_jax.py`)
+### 5\. Physics: Variational Monte Carlo (VMC) and Diffusion Monte Carlo (DMC) Simulation using JAX for nD Quantum Harmonic Oscillator (`vmc_qho_jax.py`)
 
 wait
 
