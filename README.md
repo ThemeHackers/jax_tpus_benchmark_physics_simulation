@@ -223,6 +223,10 @@ python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 200
   * `--Ex` (float, default: 0.0): Electric field strength (X-axis).
   * `--Ey` (float, default: 0.0): Electric field strength (Y-axis).
 
+### 5\. Physics: Variational Monte Carlo (VMC) and Diffusion Monte Carlo (DMC) Simulation using JAX for 1D Quantum Harmonic Oscillator (`vmc_qho_jax.py`)
+
+wait
+
 **Note:** For the main benchmark (`tpus_benchmark_single-host_workload.py`), the `--matrix_depth` (`-md`) value must be divisible by the number of cores being tested (e.g., 1, 4, and 8). The script will automatically skip tests that do not meet this requirement.
 
 -----
