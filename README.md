@@ -184,12 +184,6 @@ python3 three_particles_em_nonuni_single-host_workload.py --Bz 5.0 --n_steps 200
 
 -----
 
-## 🚀 How to Run (Multi-Host Workloads)
-
-*(...Instructions for multi-host scripts TBD...)*
-
------
-
 ## ⚠️ Parameter Warnings
 
   - Setting command-line parameters is critical and can cause tests to fail
