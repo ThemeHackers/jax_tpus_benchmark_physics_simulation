@@ -10,7 +10,7 @@ This project also includes several physics simulation scripts accelerated with J
 - Due to the high competition for resources here, I received version v4-8 (right away) (the chip is included in the project, so it's free).
 - I also tested version v3-8 and v2-8 (with a $300 credit).
 - There are actually other chips, but I couldn't request them because they were already full.
-- And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think:
+- And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think
 - The specified chip is a single-host workload type, so tpus_benchmark_single-host_workload.py can be used for testing.
 
 ## ✨ Key Features
