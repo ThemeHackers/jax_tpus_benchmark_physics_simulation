@@ -102,7 +102,7 @@ pip install jax>=0.4.0 flax orbax-checkpoint clu tensorflow-datasets tensorflow-
 
 pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
-pip install psutil rich matplotlib pandas jax-md
+pip install psutil rich matplotlib pandas jax-md scipy
 
 pip check
 ```
