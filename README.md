@@ -6,12 +6,12 @@ This project provides a comprehensive benchmark script (`tpus_benchmark_v3.py`) 
 
 This project also includes several physics simulation scripts accelerated with JAX, such as an N-Body black hole merger simulation (`nbody_bh_merger_sim.py`) and a Molecular Dynamics simulation (`molecular_dynamics_jax.py`).
 
-  - I was invited to participate in the TPU research and development for the TRC project.
-  - Since there is a lot of competition for resources here, I got v4-8 (Immediately). (The chip is included in the project so it's free.)
-  - And I tested using 300$ credit with v3-8 , v2-8. (Chips from using 300$ credits)
-  - So within this project code I have tested the following: v2-8, v3-8, v4-8 and I think other chips should work as well, but not sure for v6e, v5e chips because I have tested and there are bugs from jax lib and many others.
-  - Actually, there are other chips but I can't ask for them because they are full.
-  - And most importantly, you may find that the installation completes and checks, but a RuntimeError occurs, which means that the TPU was not found on the hardware for that chip. This is a bug in the library, which is not user-resolved. I've encountered this problem many times, but within this project, what I specified works, and what is not specified means it doesn't work, I think.
+- I was invited to participate in TPU research and development for the TRC project.
+- Due to the high competition for resources here, I received version v4-8 (right away) (the chip is included in the project, so it's free).
+- I also tested version v3-8 and v2-8 (with a $300 credit).
+- There are actually other chips, but I couldn't request them because they were already full.
+- And most importantly, you might find that the installation completes and verifies, but a runtime error occurs. This means that the TPU for that chip was not found in the hardware. This is a bug in the library, which users haven't been able to fix. I've encountered this problem several times, but within this project, what I specified works, and what I don't specify means it doesn't work. I think:
+- The specified chip is a single-host workload type, so tpus_benchmark_single-host_workload.py can be used for testing.
 
 ## ✨ Key Features
 
